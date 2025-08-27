@@ -4,8 +4,25 @@ from mcssl.message import Message   # Import the Message class
 
 client = Client(encoder=Encoder())
 
-@client.register_response_handler('result')
-def handle_result(message):
+@client.register_request()
+def add(a,b):
+    """ If it returns true then:
+            Calls the Message(method="add", args=[a,b], options={}) 
+            and handles the response. 
+        Exception otherwise
+    """
+    return True
+
+@client.register_request()
+def subtract(a,b):
+    return True
+
+@client.register_request()
+def multiply(a,b):
+    return True
+
+@client.register_response_handler()
+def result(message):
     """
     Handle result response messages by extracting and printing results.
 
@@ -17,20 +34,11 @@ def handle_result(message):
 try:
     client.connect()
     # Example messages for addition, subtraction, and multiplication
-    client.send_message(Message(method='add', args=['10', '5'], options={}))
-    response_message = client.receive_response()
-    if response_message:
-        client.handle_response(response_message)
 
-    client.send_message(Message(method='subtract', args=['10', '5'], options={}))
-    response_message = client.receive_response()
-    if response_message:
-        client.handle_response(response_message)
+    add(10,5)
+    subtract(10,5)
+    multiply(10,5)
 
-    client.send_message(Message(method='multiply', args=['10', '5'], options={}))
-    response_message = client.receive_response()
-    if response_message:
-        client.handle_response(response_message)
 except Exception as e:
     print(f"Client failed: {e}")
 finally:
