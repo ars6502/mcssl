@@ -1,21 +1,8 @@
 import socket
-import io
 from datetime import datetime, timezone
+from .common  import read_socket
 from .message import Message
 from .encoder import Encoder
-
-def read_socket(in_socket,size=1024):
-    buf = io.BytesIO()
-    done = False
-
-    while not done:
-        data = in_socket.recv(size)
-        if len(data) < size:
-            done=True
-        buf.write(data)
-
-    return buf.getvalue()
-
 
 class Client:
     """
