@@ -4,8 +4,8 @@ from mcssl.message import Message   # Import the Message class
 
 server = Server(encoder=Encoder())
 
-@server.register_method('add')
-def handle_add(message: Message):
+@server.register_method()
+def add(message: Message):
     """
     Handle addition request by adding provided numbers.
 
@@ -21,8 +21,8 @@ def handle_add(message: Message):
         options={}
     )
 
-@server.register_method('subtract')
-def handle_subtract(message: Message):
+@server.register_method()
+def subtract(message: Message):
     """
     Handle subtraction request by subtracting provided numbers.
 
@@ -38,8 +38,8 @@ def handle_subtract(message: Message):
         options={}
     )
 
-@server.register_method('multiply')
-def handle_multiply(message: Message):
+@server.register_method()
+def multiply(message: Message):
     """
     Handle multiplication request by multiplying provided numbers.
 

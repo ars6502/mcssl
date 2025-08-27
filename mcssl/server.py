@@ -45,15 +45,14 @@ class Server:
             print(f"Failed to start server: {e}")
             raise
 
-    def register_method(self, method_name):
+    def register_method(self):
         """
         Register a handler function for a specific message method.
 
-        :param method_name: The name of the method this handler is for (str)
         :return: Decorator function to register the handler
         """
         def decorator(func):
-            self.method_handlers[method_name] = func
+            self.method_handlers[func.__name__] = func
             return func
         return decorator
 

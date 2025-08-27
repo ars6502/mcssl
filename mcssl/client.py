@@ -43,16 +43,36 @@ class Client:
             print(f"Failed to connect: {e}")
             raise
 
-    def register_response_handler(self, method_name):
+    def register_response_handler(self):
         """
         Register a handler function for a specific response message type.
 
-        :param method_name: The name of the response method this handler is for (str)
         :return: Decorator function to register the handler
         """
         def decorator(func):
-            self.response_handlers[method_name] = func
+            self.response_handlers[func.__name__] = func
             return func
+        return decorator
+
+
+    def register_request(self):
+        """
+        Register a request function 
+
+        :return: Decorator function that sends the message
+        """
+        def decorator(func):
+            def wrapper(*args,**kwargs):
+                can_run = func(*args,**kwargs)
+                if can_run:
+                    self.send_message(Message(method=func.__name__,args=args,options=kwargs))
+                    response_message = self.receive_response()
+                    if response_message:
+                        self.handle_response(response_message)
+                else:
+                    raise Exception("Will not send malformed request")
+                return can_run
+            return wrapper
         return decorator
 
     def send_message(self, message: Message):
