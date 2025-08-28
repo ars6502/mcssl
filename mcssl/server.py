@@ -1,4 +1,5 @@
 import socket
+import threading
 from datetime import datetime, timezone, timedelta
 from .common  import read_socket
 from .message import Message
@@ -25,10 +26,11 @@ class Server:
         self.host = host
         self.port = port
         self.server_socket = None
+        self.stop_main_thread = False
         self.method_handlers = {}
         self.encoder = encoder  # Encoder instance passed as an argument
 
-    def start(self):
+    def start_server(self):
         """
         Start the server by binding to the address and listening for connections.
         """
@@ -44,6 +46,13 @@ class Server:
         except Exception as e:
             print(f"Failed to start server: {e}")
             raise
+        try:
+            while not self.stop_main_thread:
+                client_connection, client_address = self.server_socket.accept()
+                threading.Thread(target=self.handle_client, 
+                                 args=(client_connection,client_address)).start()
+        except:
+            pass
 
     def register_method(self):
         """
@@ -96,16 +105,27 @@ class Server:
             print(f"Closing connection to {client_address}")
             client_connection.close()
 
+    def stop_server(self):
+        self.stop_main_thread = True
+
+        # makes a dummy connection just to unlock accept method
+        # and trigger the graceful stop
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((self.host,self.port))
+
+
     def run(self):
         """
         Run the server loop, accepting and handling client connections.
         """
+
+
         try:
-            while True:
-                client_connection, client_address = self.server_socket.accept()
-                self.handle_client(client_connection, client_address)
-        except KeyboardInterrupt:
+            self.main_thread = threading.Thread(target=self.start_server,args=())
+            self.main_thread.start()
+
+        except KeyboardInterrupt as e:
             print('Shutting down server...')
-        finally:
-            if self.server_socket:
-                self.server_socket.close()
+            self.stop_server()
+            self.main_thread.join()
+            self.server_socket.close()
+

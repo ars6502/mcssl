@@ -55,6 +55,5 @@ def multiply(message: Message):
         options={}
     )
 
-server.start()
 server.run()
 
