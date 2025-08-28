@@ -1,4 +1,4 @@
-from .connection import Connection
+from mcssl.connection import Connection
 
 class PlainConnection(Connection):
     def wrap_socket(self,client_socket):

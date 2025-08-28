@@ -5,12 +5,11 @@ class SSLConnection(Connection):
     def __init__(self,cert,key):
         self.cert = cert
         self.key = key
-        self.password = None
         self.context = None
 
         try:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            context.load_cert_chain(self.cert,self.ssl,self.password)
+            context.load_cert_chain(self.cert,self.key)
         except ssl.SSLError as e:
             sys.exit('Error in SSL certificate/password')
 

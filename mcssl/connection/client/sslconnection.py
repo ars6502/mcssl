@@ -7,9 +7,10 @@ class SSLConnection(Connection):
         self.cert_hostname=cert_hostname
 
         self.context = None
-
+        
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        context.load_verify_locations(cadata=self.cert)
+        context.verify_mode = ssl.CERT_REQUIRED
+        context.load_verify_locations(self.cert)
 
         self.context = context
 

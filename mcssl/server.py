@@ -1,12 +1,15 @@
 import socket
 import threading
+import sys
+import ssl
 from datetime import datetime, timezone, timedelta
 from .common  import read_socket
 from .message import Message
 from .encoder import Encoder
+from .connection.server import *
 
 
-class Server:
+class Server(object):
     """
     Represents a server that handles incoming client connections and processes messages.
 
@@ -15,7 +18,7 @@ class Server:
     :param encoder: Encoder instance for encoding/decoding messages
     """
 
-    def __init__(self, host='localhost', port=10000, encoder=None):
+    def __init__(self, host='localhost', port=10000, encoder=None,connection_type=PlainConnection()):
         """
         Initialize a Server object.
 
@@ -29,6 +32,7 @@ class Server:
         self.stop_main_thread = False
         self.method_handlers = {}
         self.encoder = encoder  # Encoder instance passed as an argument
+        self.connection_type = connection_type
 
     def start_server(self):
         """
@@ -48,11 +52,15 @@ class Server:
             raise
         try:
             while not self.stop_main_thread:
-                client_connection, client_address = self.server_socket.accept()
-                threading.Thread(target=self.handle_client, 
-                                 args=(client_connection,client_address)).start()
-        except:
-            pass
+                try:
+                    client_connection, client_address = self.server_socket.accept()
+                    wrapped_connection = self.connection_type.wrap_socket(client_connection)
+                    threading.Thread(target=self.handle_client, 
+                                 args=(wrapped_connection,client_address)).start()
+                except ssl.SSLError as ex:
+                    print("SSL Error")
+        except Exception as e:
+            print(e)
 
     def register_method(self):
         """

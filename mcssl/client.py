@@ -4,7 +4,9 @@ from .common  import read_socket
 from .message import Message
 from .encoder import Encoder
 
-class Client:
+from .connection.client import *
+
+class Client(object):
     """
     Represents a client that connects to the server and sends/receives messages.
 
@@ -13,7 +15,7 @@ class Client:
     :param encoder: Encoder instance for encoding/decoding messages
     """
 
-    def __init__(self, host='localhost', port=10000, encoder=None):
+    def __init__(self, host='localhost', port=10000, encoder=None, connection_type=PlainConnection()):
         """
         Initialize a Client object.
 
@@ -26,13 +28,16 @@ class Client:
         self.client_socket = None
         self.response_handlers = {}
         self.encoder = encoder  # Encoder instance passed as an argument
+        self.connection_type = connection_type
 
     def connect(self):
         """
         Connect to the server at the specified address and port.
         """
         # Create a TCP/IP socket
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket = self.connection_type.wrap_socket(
+                            socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        )
         server_address = (self.host, self.port)
 
         print(f'Connecting to {server_address[0]} port {server_address[1]}')
